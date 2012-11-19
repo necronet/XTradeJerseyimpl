@@ -2,26 +2,60 @@ apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'idea'
 
-
-idea.module.testSourceDirs += file('src/test/java/')
-
-
+version = "1.0"
 
 repositories{
 	mavenCentral()
 
 }
 
+configurations{
+    integTest.extendsFrom testRuntime
+}
+
+
+//Configure the modules for intelliJ
+idea.module{
+
+    testSourceDirs += file('src/test/java/')
+    sourceDirs += file('src/integration-test/java/')
+    scopes.PROVIDED.plus += configurations.integTest
+
+}
+
 List compileLibraries =['com.sun.jersey:jersey-server:1.14',
-                        'com.sun.jersey:jersey-grizzly2:1.14',
+                        'com.sun.jersey:jersey-grizzly:1.14',
                         'com.sun.jersey:jersey-core:1.14',
-			'com.sun.jersey:jersey-servlet:1.14', 
-                        'javax.ws.rs:jsr311-api:1.1.1']
+                        'com.sun.jersey:jersey-json:1.14',
+			            'com.sun.jersey:jersey-servlet:1.14',
+                        'javax.ws.rs:jsr311-api:1.1.1',
+                        'org.slf4j:slf4j-simple:1.6.6']
 
 List testLibraries=['junit:junit:4.10']
+
+
 
 dependencies{
 	compile (compileLibraries)
 	testCompile testLibraries
+    integTest 'com.sun.jersey.jersey-test-framework:jersey-test-framework-core:1.8'
+    integTest 'com.sun.jersey.jersey-test-framework:jersey-test-framework-grizzly:1.14'
+    integTest 'com.sun.jersey:jersey-client:1.14'
 }
 
+sourceSets {
+       integTest{
+           java.srcDir file('src/integration-test/java/')
+           resources.srcDir file('src/integration-test/resouces/')
+           compileClasspath = sourceSets.main.output + configurations.integTest
+           runtimeClasspath = output + compileClasspath
+       }
+}
+
+
+task integrationTest(type: Test ){
+    testClassesDir = sourceSets.integTest.output.classesDir
+    classpath = sourceSets.integTest.runtimeClasspath
+}
+
+check.dependsOn integrationTest
