@@ -1,5 +1,7 @@
 package com.xtrade.entity;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Created with IntelliJ IDEA.
  * User: jespinoza
@@ -7,6 +9,7 @@ package com.xtrade.entity;
  * Time: 5:37 PM
  * To change this template use File | Settings | File Templates.
  */
+@XmlRootElement
 public class Trader {
 
     public String name;
